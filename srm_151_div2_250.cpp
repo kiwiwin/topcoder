@@ -1,40 +1,29 @@
 #include <string>
 #include <vector>
-#include <sstream>
+
 using namespace std;
 
-class PrefixCode
-{ 
+class PrefixCode {
 public:
-	string IsPrefixFound( vector<string> words )
-	{
-		string notfind = "";
-		if(words.size() == 1) return notfind;
-		for (int i = 0; i < words.size(); i++)
-		{ 
-			for (int j = 0 ; j < words.size(); j++)
-			{
-				if( i == j) continue;
-				size_t found = words[j].find(words[i]);
-				if ( found == 0 )
-				{
-					stringstream pos;
-					pos<<i;
-					return pos.str();
-				} 
-			}	
-		}
-		return notfind; 
+	string outputNo(int index){
+		char buf[250];
+		sprintf(buf, "No, %d", index);
+		return buf;
 	}
-	
-	string	isOne( vector<string> words)
-	{
-		string findpre = "No, ";
-		string nopre = "Yes";
-		if ( IsPrefixFound(words) == "" )
-			return nopre;
-		else
-		  	return findpre += IsPrefixFound(words) ;
-			 
+
+	bool checkPrefix(vector<string> words, int index) {
+		for (int i = 0; i < words.size(); i++) {
+			if (i == index) continue;
+			if (words[i].find(words[index]) == 0) return false;
+		}
+		return true;
+	}
+
+	string isOne(vector <string> words) {
+		for (int i = 0; i < words.size(); i++)
+			if (!checkPrefix(words, i)) { 
+				return outputNo(i);
+			}
+		return "Yes";
 	}
 };

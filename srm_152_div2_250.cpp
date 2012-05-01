@@ -1,37 +1,33 @@
-#include <vector>
+#include <algorithm>
 using namespace std;
 
 class FixedPointTheorem{
 public:
+	double Fx(double X, double R) {
+		return R * X * (1-X);
+	}
 	
-	vector<double> get1knum (double R,vector<double>& num)
-	{
-		num.clear();
-		for(int i = 0; i < 200000; i++)
-		{
-		 	x = x*(1-x)*r;
+	double After2MillionIteration(double X, double R) {
+		double res = X;
+		for (int i = 0; i < 200000; i++) {
+			res = Fx(res, R);
 		}
-		for(int i = 0; i < 1000; i++)
-		{
-		 	x = x*(1-x)*R;
-			num.push_back(x);	 	
+		return res;
+	}
+
+	double rangeOf1K(double X, double R) {
+		X = Fx(X, R);
+		double MINX = X, MAXX = X;
+		for(int i = 2; i <= 1000; i++) {
+			X = Fx(X,R);
+			MINX = min(MINX, X); MAXX = max(MAXX, X);
 		}
-		return num;
-	}	
-		
-	double cycleRange(double R)
-	{
-		double max = 0;
-		double min = 1;
-		vector<double> num;
-		num = get1knum(R,num);
-		for(int i = 0; i < 1000; i++)
-		{
-		 	if(num[i] > max)
-		 		max = num[i];
-		 	if(num[i] < min)
-		 		min = num[i];
-		}
-		return max - min;
+		return MAXX - MINX;
+	}
+
+	double cycleRange(double R){
+		double X = 0.25;
+		X = After2MillionIteration(X, R);
+		return rangeOf1K(X, R);
 	}
 };

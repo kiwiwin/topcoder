@@ -27,14 +27,20 @@ public:
 		}
 		return res;
 	}
+	
+	vector<string> getNums(string equation) {
+		vector<string> res;
+		int addIndex = equation.find("+");
+		int eqIndex = equation.find("=");
+		res.push_back(equation.substr(0, addIndex));
+		res.push_back(equation.substr(addIndex+1, eqIndex-addIndex-1));
+		res.push_back(equation.substr(eqIndex+1, equation.size()-eqIndex-1));
+		return res;
+	}
 
 	vector <int> getBase(string equation) {
 		string x,y,z;
-		int addIndex = equation.find("+");
-		int eqIndex = equation.find("=");
-		x = equation.substr(0, addIndex);
-		y = equation.substr(addIndex+1, eqIndex-addIndex-1);
-		z = equation.substr(eqIndex+1, equation.size()-eqIndex-1);
+		x = getNums(equation)[0]; y = getNums(equation)[1]; z = getNums(equation)[2];
 		vector<int> res;
 		for (int i = 2; i <= 20; i++) {
 			if (validBase(x, i) && validBase(y, i) && validBase(z, i))

@@ -2,56 +2,98 @@
 #include <vector>
 using namespace std;
 
+class LeftChamper;
+class RightChamper;
+
+class Champer {
+public:
+	virtual void move() = 0;
+	virtual ~Champer() {}
+	bool in() {
+		return place >= 0 && place < SIZE;
+	}
+	int getPlace() { return place; }
+protected:
+	Champer(int SIZE_, int speed_, int place_) : SIZE(SIZE_), speed(speed_), place(place_) {}
+	int SIZE;
+	int speed;
+	int place;
+};
+
+class LeftChamper : public Champer {
+public:
+	LeftChamper(int SIZE, int speed, int place) : Champer(SIZE, speed, place) {}
+
+	virtual void move() {
+		place -= speed;
+	}
+};
+
+class RightChamper : public Champer {
+public:
+	RightChamper(int SIZE, int speed, int place) : Champer(SIZE, speed, place) {}
+	virtual void move() {
+		place += speed;
+	}
+};
+
+class ChamperFactory {
+public:
+	static Champer* createChamper(char type, int SIZE, int speed, int place) {
+		Champer *champer = NULL;
+		if( type == 'L') champer = new LeftChamper(SIZE, speed, place);
+		if( type == 'R') champer = new RightChamper(SIZE, speed, place);
+		return champer;
+	}
+};
+
+class ChamperList {
+public:
+	void addChamper(Champer* c) {
+		list.push_back(c);
+	}
+
+	void move() {
+		for (int i = 0; i < list.size(); i++)
+			list[i]->move();
+	}
+
+	vector<int> getPlaces() {
+		vector<int> res;
+		for (int i = 0; i < list.size(); i++)
+			if (list[i]->in()) res.push_back(list[i]->getPlace());
+		return res;
+	}
+	
+	string toString(int SIZE) {
+		string res(SIZE, '.');
+		vector<int> places = getPlaces();
+		for (int i = 0; i < places.size(); i++)
+			res[places[i]] = 'X';
+		return res;
+	}
+private:
+	vector<Champer*> list;
+};
+
 class Animation {
 public:
-	int SIZE;
-
-	vector<int> getLeftChamper(string init) {
-		vector<int> res;
-		for (int i = 0; i < init.size(); i++)
-			if (init[i] == 'L') res.push_back(i);
-		return res;
+	ChamperList getChamperListFromInit(int speed, string init) {
+		ChamperList cl;
+		for (int i = 0; i < init.size(); i++) {
+			if (init[i] != '.') cl.addChamper(ChamperFactory::createChamper(init[i], init.size(), speed, i));
+		}
+		return cl;
 	}
 	
-	vector<int> getRightChamper(string init) {
-		vector<int> res;
-		for (int i = 0; i < init.size(); i++)
-			if (init[i] == 'R') res.push_back(i);
-		return res;
-	}
-
-	vector<int> moveLeft(vector<int> cham, int speed) {
-		vector<int> res;
-		for (int i = 0; i < cham.size(); i++) 
-			if (cham[i] - speed >= 0) res.push_back(cham[i] - speed);
-		return res;
-	}
-	
-	vector<int> moveRight(vector<int> cham, int speed) {
-		vector<int> res;
-		for (int i = 0; i < cham.size(); i++) 
-			if (cham[i] + speed < SIZE) res.push_back(cham[i] + speed);
-		return res;
-	}
-
-	string getOccupied(vector<int> l, vector<int> r) {
-		string res(SIZE, '.');
-		for (int i = 0; i < l.size(); i++) res[l[i]] = 'X';
-		for (int i = 0; i < r.size(); i++) res[r[i]] = 'X';
-		return res;
-	}
-
 	vector <string> animate(int speed, string init) {
-		SIZE = init.size();
-		vector<int> lc = getLeftChamper(init);
-		vector<int> rc = getRightChamper(init);		
-		
+		ChamperList list = getChamperListFromInit(speed, init);
 		vector<string> res;
+		string final(init.size(), '.');
 		while(true) {
-			string round = getOccupied(lc, rc);
-			res.push_back(round);
-			if (lc.empty() && rc.empty()) break;
-			lc = moveLeft(lc, speed); rc = moveRight(rc, speed);
+			res.push_back(list.toString(init.size()));
+			if (res[res.size()-1] == final) break;
+			list.move();
 		}
 		return res;
 	}

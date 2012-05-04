@@ -1,5 +1,4 @@
- srm_150_div2_250.cpp
-
+srm_150_div2_250
 
 cmath
        double ceil (      double x );
@@ -8,3 +7,22 @@ cmath
 
 Round up value
 Returns the smallest integral value that is not less than x.
+
+有点在于可以保持原有数据类型。
+
+
+srm_151_div2_250
+
+对嵌套循环的重构，对分支的重构
+
+
+srm_152_div2_250
+
+#include <algorithm>
+
+min() max()
+
+
+srm_156_div2_250
+
+sort() reverse()

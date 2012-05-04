@@ -1,0 +1,10 @@
+ srm_150_div2_250.cpp
+
+
+cmath
+       double ceil (      double x );
+      	float ceil (       float x );
+  long double ceil ( long double x );
+
+Round up value
+Returns the smallest integral value that is not less than x.

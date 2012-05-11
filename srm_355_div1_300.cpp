@@ -13,7 +13,7 @@ public:
 		return res;
 	} 
 	
-	double greedyMix(vector<pair<double,double> > v1, vector<pair<double,double> > v2, int need) {
+	double greedyMix(vector<pair<double,double> > v1, vector<pair<double,double> > v2) {
 		sort(v1.begin(), v1.end(), greater<pair<double, double> >());
 		sort(v2.begin(), v2.end());
 
@@ -28,7 +28,7 @@ public:
 		return res;
 	}
 	
-	double needPercentAmount(vector<int> &percent, vector<int> &amount, int need) {
+	double needPercentAmount(vector<int> &percent, vector<int> &amount) {
 		double res = 0;
 		for(int i = 0; i < percent.size(); i++) { 
 			if (percent[i] == need) res += amount[i];
@@ -36,7 +36,7 @@ public:
 		return res;
 	}
 	
-	vector<pair<double,double> > getLowerPercent(vector<int> &percent, vector<int> &amount, int need) {
+	vector<pair<double,double> > getLowerPercent(vector<int> &percent, vector<int> &amount) {
 		vector<pair<double, double> > res;
 		for(int i = 0; i < percent.size(); i++) { 
 			if (percent[i] < need) res.push_back(make_pair(percent[i], amount[i]));
@@ -44,7 +44,7 @@ public:
 		return res;
 	}
 	
-	vector<pair<double,double> > getHigherPercent(vector<int> &percent, vector<int> &amount, int need) {
+	vector<pair<double,double> > getHigherPercent(vector<int> &percent, vector<int> &amount) {
 		vector<pair<double, double> > res;
 		for(int i = 0; i < percent.size(); i++) { 
 			if (percent[i] > need) res.push_back(make_pair(percent[i], amount[i]));
@@ -52,10 +52,13 @@ public:
 		return res;
 	}
 	
-	double howMuch(vector <int> percent, vector <int> amount, int need) {
-		vector<pair<double,double> > low = getLowerPercent(percent, amount, need);
-		vector<pair<double,double> > high = getHigherPercent(percent, amount, need);
+	double howMuch(vector <int> percent, vector <int> amount, int need_) {
+		need = need_;
+		vector<pair<double,double> > low = getLowerPercent(percent, amount);
+		vector<pair<double,double> > high = getHigherPercent(percent, amount);
 		
-		return greedyMix(low, high, need) + needPercentAmount(percent, amount, need);
+		return greedyMix(low, high) + needPercentAmount(percent, amount);
 	}
+private:
+	int need;
 };

@@ -31,3 +31,4 @@ string RowAndManyCoins::getWinner(string cells) {
 	else
 		return "Bob";
 }
+

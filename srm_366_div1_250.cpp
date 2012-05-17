@@ -22,30 +22,30 @@ using namespace std;
 class ChangingSounds {
 public:
 	int maxFinal(vector <int>, int, int);
-	int dp[50][1001];
+	bool dp[51][1001];
+	int maxLevel;
+	bool checkBoundary(int level) {
+		return level >= 0 && level <= maxLevel;
+	}
 };
 
 int ChangingSounds::maxFinal(vector <int> inter, int bl, int ml) {
 	memset(dp, 0, sizeof(dp));
+	maxLevel = ml;
 
-	bool f = false;
-	if (inter[0]+bl >= 0 && inter[0]+bl <= ml) { dp[0][inter[0]+bl] = 1; f = true;}
-	if (-inter[0]+bl >= 0 && -inter[0]+bl <= ml) { dp[0][-inter[0]+bl] = 1; f = true;}
-	if (!f) return -1;
-	
-		
-	for (int i = 1; i < inter.size(); i++) {
+	dp[0][bl] = true;
+	for (int i = 1; i <= inter.size(); i++) {
+		bool flag = false;
 		for (int l = 0; l <= ml; l++) {
 			if (!dp[i-1][l]) continue;
-			if(inter[i]+l >= 0 && inter[i]+l <= ml) dp[i][inter[i]+l] =  1;
-			if(-inter[i]+l >= 0 && -inter[i]+l <= ml) dp[i][-inter[i]+l] =  1;
+			if (checkBoundary(inter[i-1]+l)) { flag = true; dp[i][inter[i-1]+l] = true; }
+			if (checkBoundary(-inter[i-1]+l)) { flag = true; dp[i][-inter[i-1]+l] = true; } 
 		}
-		bool f = true;
-		for (int l = 0; l <= ml; l++) if (dp[i][l]) f = false;
-		if (f) return -1;
+		if (!flag) return -1;
 	}
+
 	int res = 0;
-	for (int l = 0; l <= ml; l++) if (dp[inter.size()-1][l]) res = l;
+	for (int l = 0; l <= ml; l++) if (dp[inter.size()][l]) res = l;
 	return res;
 }
 

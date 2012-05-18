@@ -25,49 +25,25 @@ int dy[] = {0, 1, 0, -1};
 class SpiralRoute {
 public:
 	vector <int> thronePosition(int, int);
-	int width, length;
-	int dir;
-	bool vis[5000][5000];
-	int x, y;
-	bool shouldTurn(){
-		if (x+dx[dir] < 0 || x+dx[dir] >= width) return true;
-		if (y+dy[dir] < 0 || y+dy[dir] >= length) return true;	
-		return vis[x+dx[dir]][y+dy[dir]];
-	}
-	bool end() {
-		if (shouldTurn()) {
-			int old_dir = dir;
-			turn();
-			if (shouldTurn()) return true;
-			dir = old_dir;
-		}
-		return false;
+	vector<int> makePosition(int x, int y) {
+		vector<int> res(2,0);
+		res[0] = x, res[1] = y;
+		return res;
 	}
 	
-	void turn() {
-		dir = (dir+1) % 4;
-	}
-	
-	void move() {
-		x += dx[dir]; y += dy[dir];
+	vector<int> addOffset(vector<int> pos, int dx, int dy) {
+		pos[0] += dx, pos[1] += dy;
+		return pos;
 	}
 };
 
-vector <int> SpiralRoute::thronePosition(int width_, int length_) {
-	x = 0; y = 0; dir = 0;
-	width = width_; length = length_;
-	memset(vis, 0, sizeof(vis));
+vector <int> SpiralRoute::thronePosition(int width, int length) {
+	if (length == 1) return makePosition(width-1, 0);
+	if (length == 2) return makePosition(0, 1);
+	if (width == 1) return makePosition(0, length-1);
+	if (width == 2) return makePosition(0, 1);
 	
-	while(!end()){
-		vis[x][y] = true;
-		if (shouldTurn()) turn();
-		move();
-	}
-	
-	vector<int> res;
-	res.push_back(x); res.push_back(y);
-	
-	return res;
+	return addOffset(thronePosition(width-2, length-2),1,1);
 }
 
 <%:testing-code%>

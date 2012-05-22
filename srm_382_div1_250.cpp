@@ -24,7 +24,31 @@ int dy[] = {-2, 2, -2, 2, -1, 1, -1, 1};
 
 struct Rider {
 	int x,y,move;
-	Rider(int x_, int y_, int move_): x(x_), y(y_), move(move_) {}
+	vector<string> board;
+	Rider(int x_, int y_, int move_, vector<string> board_): x(x_), y(y_), move(move_), board(board_) {}
+	
+	bool visible(int x, int y) {
+		if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size()) return false;
+		return !vis[x][y];
+	}
+	
+	bool vis[15][15]; 
+	
+	int needMoves(int destx, int desty) {
+		memset(vis, 0, sizeof(vis));
+		queue<pair<pair<int,int>,int> >Q;
+		Q.push(make_pair(make_pair(x, y), 0));
+		while(!Q.empty()) {
+			pair<pair<int,int>,int> now = Q.front(); Q.pop();
+			if (now.first.first == destx && now.first.second == desty) return ceil(1.0*now.second/move);
+			if (vis[now.first.first][now.first.second]) continue;
+			vis[now.first.first][now.first.second] = true;
+			for (int i = 0; i < 8; i++) {
+				if (visible(now.first.first+dx[i], now.first.second+dy[i])) Q.push(make_pair(make_pair(now.first.first+dx[i], now.first.second+dy[i]), now.second+1));
+			}
+		}
+		return -1;
+	}
 };
 
 class CollectingRiders {
@@ -34,7 +58,7 @@ public:
 		vector<Rider> res;
 		for (int i = 0; i < board.size(); i++) 
 		for (int j = 0; j < board[i].size(); j++) {
-			if (isdigit(board[i][j])) res.push_back(Rider(i,j,board[i][j]-'0'));
+			if (isdigit(board[i][j])) res.push_back(Rider(i,j,board[i][j]-'0',board));
 		}
 		return res;
 	}
@@ -42,33 +66,12 @@ public:
 	int minMoves(int x, int y) {
 		int res = 0;
 		for (int i = 0; i < rider.size(); i++) {
-			if (getMoves(rider[i], x, y) < 0) return -1;
-			else res += getMoves(rider[i], x, y);
+			if (rider[i].needMoves(x, y) < 0) return -1;
+			else res += rider[i].needMoves(x, y);
 		}
 		return res;
 	}
-	
-	int getMoves(Rider r, int x, int y) {
-		memset(vis, 0, sizeof(vis));
-		queue<pair<pair<int,int>,int> >Q;
-		Q.push(make_pair(make_pair(r.x, r.y), 0));
-		while(!Q.empty()) {
-			pair<pair<int,int>,int> now = Q.front(); Q.pop();
-			if (now.first.first == x && now.first.second == y) return ceil(1.0*now.second/r.move);
-			if (vis[now.first.first][now.first.second]) continue;
-			vis[now.first.first][now.first.second] = true;
-			for (int i = 0; i < 8; i++) {
-				if (visible(now.first.first+dx[i], now.first.second+dy[i])) Q.push(make_pair(make_pair(now.first.first+dx[i], now.first.second+dy[i]), now.second+1));
-			}
-		}
-		return -1;
-	}
-	
-	bool visible(int x, int y) {
-		if (x < 0 || x >= board.size() || y < 0 || y >= board[0].size()) return false;
-		return !vis[x][y];
-	}
-	bool vis[15][15]; 
+
 	vector<string> board;
 	vector<Rider> rider;
 };

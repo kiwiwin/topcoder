@@ -1,0 +1,18 @@
+==What is Topcoder
+
+Topcoder(www.topcoder.com/tc) is a great website for anyone love programming.You can compete with the greatest coder in the
+earth. 
+
+==Why Setup this Repository
+
+Topcoder is a good material for practcing algorithm. And it is also good for how to write readable code for complex algorithm.
+I use this repository to practice with Crane to write the code more beautiful.
+
+==Connect me
+
+Anyone has criticals about this repository or want to submit solutions can send a pull request. I will handle the requests.
+
+==NOTICE
+
+Everyone should pass system tests before commit.
+Note that the system tests is different from the tests in the editor dialog. It is at [Practice Options]-->[Run System Test]

@@ -26,3 +26,7 @@ min() max()
 srm_156_div2_250
 
 sort() reverse()
+
+srm_159_div2_250
+
+int/int 型的相除会得到整数，不能再被ceil

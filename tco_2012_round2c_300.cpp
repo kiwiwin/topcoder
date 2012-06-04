@@ -1,6 +1,6 @@
 #include <vector>
 #include <string>
-#include <iostream>
+#include <climits>
 
 using namespace std;
 
@@ -21,71 +21,75 @@ public:
 		addDis(tens, 10);
 		addDis(ones, 1);
 	}
+	
+	int nextCityWithoutReconstruct(int now) {
+		int min_distance = -1, next = -1;
+		for (int i = 0; i < N; i++) {
+			if (vis[i]) continue;
+			if (min_distance < 0) { next = i; min_distance = dis[now][next]; }
+			else if (min_distance > dis[now][i]) { next = i; min_distance = dis[now][next]; }
+		}
+		return next;
+	}
 
 	int solve(int now, bool reconstruct) {
-		if (reconstruct) {
-			int res = -1, next = -1;
-			for (int i = 0; i < N; i++) {
-				if (vis[i]) continue;
-				if (res < 0) { res = dis[now][i]; next = i;}
-				else if(res > dis[now][i]) { res = dis[now][i]; next = i;}
-			}
-			if (next < 0) return 0;
-			else {
-				vis[next] = true;
-				int result = res + solve(next, reconstruct);
-				vis[next] = false;
-				return result;
-			}
-		} else {
-			int result = 0;
-			//do not reconstruct now
-			int res = -1, next = -1;
-			for (int i = 0; i < N; i++) {
-				if (vis[i]) continue;
-				if (res < 0) { res = dis[now][i]; next = i;}
-				else if(res > dis[now][i]) { res = dis[now][i]; next = i;}
-			}
-			if (next < 0) result = 0;
-			else {
-				vis[next] = true;
-				result = res + solve(next, reconstruct);
-				vis[next] = false;
-			}
-			
-			//reconstruct now
-			for (int i = 0; i < N; i++) {
-				if (vis[i]) continue;
-				//choose i as reconstrcut destination
-				int cnt = 0; int min_value = 9999;
-				for (int j = 0; j < i; j++) {
-					if (vis[j]) continue;
-					if (dis[now][j] <= dis[now][i]) cnt++; 
-					min_value = min(min_value, dis[now][j]-1);
-				}
-				for (int j = i+1; j < N; j++) {
-					if (vis[j]) continue;
-					if (dis[now][j] < dis[now][i]) cnt++; 
-					min_value = min(min_value, dis[now][j]); 
-				}
-				
-				//change the [now][i]
-				if (min_value > 0) {
-					vis[i] = true;
-					result = max(result, min_value + solve(i, true));
-					vis[i] = false;
-				}
-				
-				//change the [now][else]
-				if (cnt <= 1 && dis[now][i] < 9999) {
-					vis[i] = true;
-					result = max(result, dis[now][i] + solve(i, true));
-					vis[i] = false;
-				}
-			}
-			
-			return result;
+		vis[now] = true;
+		int result = subsolve(now, reconstruct);
+		vis[now] = false;
+		return result;
+	}
+	
+	int solveWithoutReconstruct(int now, int nextCity, bool reconstruct) {
+		if (nextCity < 0) return 0;
+		else return dis[now][nextCity] + solve(nextCity, reconstruct);
+	}
+	
+	int solveReconstructWithItself(int now, int nextCity) {
+		int min_value = 9999;
+		for (int i = 0; i < nextCity; i++) {
+			if (vis[i]) continue;
+			min_value = min(dis[now][i]-1, min_value);
 		}
+		for (int i = nextCity + 1; i < N; i++) {
+			if (vis[i]) continue;
+			min_value = min(dis[now][i], min_value);
+		}
+		
+		if (min_value > 0) return min_value + solve(nextCity, true);
+		else return 0;
+	}
+	
+	int solveReconstructWithOther(int now, int nextCity) {
+		int cnt = 0;
+		for (int i = 0; i < nextCity; i++) {
+			if (vis[i]) continue;
+			if (dis[now][nextCity] >= dis[now][i]) cnt++;
+		}
+		for (int i = nextCity + 1; i < N; i++) {
+			if (vis[i]) continue;
+			if (dis[now][nextCity] > dis[now][i]) cnt++;
+		}
+		
+		if (cnt <= 1 && dis[now][nextCity] < 9999) return dis[now][nextCity] + solve(nextCity, true);
+		else return 0;
+	}
+	
+ 	int subsolve(int now, bool reconstruct) {
+		int result = 0;
+		int nextCity = nextCityWithoutReconstruct(now);
+	
+		result = solveWithoutReconstruct(now, nextCity, reconstruct);
+	
+		if (!reconstruct) {
+			for (int i = 0; i < N; i++) {
+				if (vis[i]) continue;
+				
+				result = max(solveReconstructWithItself(now, i), result);
+				result = max(solveReconstructWithOther(now, i), result);
+			}
+		}
+		
+		return result;
 	}
 	
 	bool vis[35];
@@ -93,14 +97,9 @@ public:
 
 	int worstDistance(vector<string> thousands, vector<string> hundreds, vector<string> tens, vector<string> ones) {
 		initDis(thousands, hundreds, tens, ones);	
-		for (int i = 0; i < ones.size(); i++)  {
-			for (int j = 0; j < ones.size(); j++)
-				cout << dis[i][j] << " ";
-			cout << endl;
-		}
 		memset(vis, false, sizeof(vis));
 		N = ones.size();
-		vis[0] = true;
+		
 		return solve(0, false);	
 	}
 };

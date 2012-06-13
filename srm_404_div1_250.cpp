@@ -67,7 +67,7 @@ public:
 	vector<string> calcTriangle(vector<string> Q) {
 		while(hasQ(Q)) {
 			while (hasKnowSumAndOneNum(Q)) {
-				(Q);
+				fillKnowSumAndOneNum(Q);
 			}
 			while (hasKnowTwoNum(Q)) {
 				fillKnowTwoNum(Q);

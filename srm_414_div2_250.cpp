@@ -5,23 +5,44 @@ using namespace std;
 
 class RestaurantManager {
 public:
-	int allocateTables(vector<int> tables, vector<int> group, vector<int> arrivals, vector<int> departures) {
+	vector<int> tableLeaveTime;
+	vector<int> tables, group, arrivals, departures;
+
+	void askCustomerLeave(int nowTime) {
+		for (int i = 0; i < tableLeaveTime.size(); i++)
+			if (tableLeaveTime[i] <= nowTime) tableLeaveTime[i] = -1;
+	}
+	
+	bool canAcceptGroup(int groupIndex) {
+		for (int i = 0; i < tables.size(); i++) {
+			if (!isTableAvaiable(i)) continue;
+			if (tables[i] >= group[groupIndex]) return true;
+		}
+		return false;
+	}
+	
+	void acceptGroup(int groupIndex) {
+		for (int i = 0; i < tables.size(); i++) {
+			if (!isTableAvaiable(i)) continue;
+			if (tables[i] >= group[groupIndex]) { tableLeaveTime[i] = departures[groupIndex]; return; }
+		}
+	}
+	
+	bool isTableAvaiable(int tableIndex) {
+		return tableLeaveTime[tableIndex] < 0;
+	}
+
+	int allocateTables(vector<int> _tables, vector<int> _group, vector<int> _arrivals, vector<int> _departures) {
 		int res = 0;
+		
+		tableLeaveTime = vector<int>(_tables.size(), -1);
+		tables = _tables; group = _group; arrivals = _arrivals; departures = _departures;
 		sort(tables.begin(), tables.end());
-		vector<int> tableLeaveTime(tables.size(), -1);
 		
 		for (int g = 0; g < group.size(); g++) {
-			int nowTime = arrivals[g];
-			for (int i = 0; i < tableLeaveTime.size(); i++)
-				if (tableLeaveTime[i] <= nowTime) tableLeaveTime[i] = -1;
-				
-			bool flag = false;
-			for (int i = 0; i < tables.size(); i++) {
-				if (tableLeaveTime[i] >= 0) continue;
-				if (tables[i] >= group[g]) { tableLeaveTime[i] = departures[g]; flag = true; break; }
-			}
-			
-			if (!flag) { res += group[g]; }
+			askCustomerLeave(arrivals[g]);
+			if (canAcceptGroup(g)) acceptGroup(g);
+			else res += group[g];
 		}
 		return res;
 	}

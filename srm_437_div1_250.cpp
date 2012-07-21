@@ -17,29 +17,30 @@ public:
 		int x; ss >> x;
 		return x;
 	}
+	
+	int solve(const vector<string> &V, int K) {
+		if (K == 0) {
+			if (V.empty()) return -1;
+			else return str2int(*max_element(V.begin(), V.end()));
+		}
+
+		set<string> next;
+
+		for (int v = 0; v < V.size(); v++) 
+			for (int i = 0; i < V[v].size(); i++)
+			for (int j = i+1; j < V[v].size(); j++) {
+				if (V[v][j] == '0' && i == 0) continue;
+				string s = V[v];
+				swap(s[i], s[j]);
+				next.insert(s);
+			}
+			
+		return solve(vector<string>(next.begin(),next.end()), K-1);
+	}
 
 	int findMax(int n, int K) {
-		vector<string> Old;	Old.push_back(int2str(n));
-		set<string> New;
-		for (int k = 1; k <= K; k++) {
-			for (int o = 0; o < Old.size(); o++) {
-				for (int i = 0; i < Old[o].size(); i++)
-				for (int j = i+1; j < Old[o].size(); j++) {
-					if (Old[o][j] == '0' && i == 0) continue;
-					string s = Old[o];
-					swap(s[i], s[j]);
-					New.insert(s);
-				}
-			}
-			Old.clear();
-			Old = vector<string>(New.begin(), New.end());
-			New.clear();
-		}
-		
-		int result = -1;
-		for (int i = 0; i < Old.size(); i++) {
-			result = max(result, str2int(Old[i]));
-		}
-		return result;
+		vector<string> init;	
+		init.push_back(int2str(n));
+		return solve(init, K);
 	}
 };

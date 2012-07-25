@@ -66,34 +66,24 @@ public:
 			if (M[top][next]) continue;
 			
 			M[top][next] = true;			
-			bool tryResult = tryB(next);
+			bool tryResult = false;
+			if (isFreeB(next)) {
+				usedB[next] = true;
+				return true;
+			} else {
+				int nextTop = -1;
+				for (int i = 0; i < T; i++) {
+					if (i == top) continue;
+					if (M[i][next]) {
+						nextTop = i; break;
+					}
+				}
+				M[nextTop][next] = false;
+				tryResult = tryT(nextTop);
+				if (!tryResult) M[nextTop][next] = true;
+			}
 			if (tryResult) return true;
-			else M[top][next] = false;
-		}
-
-		return false;
-	}
-	
-	//from bottom to top, choose matched edge
-	bool tryB(int bot) {
-		if (visB[bot]) return false;
-		visB[bot] = true;
-
-		if (isFreeB(bot)) {
-			usedB[bot] = true;
-			return true;
-		}
-		
-		for (int next = 0;next < T; next++) {
-			if (!G[next][bot]) continue;
-			if (!M[next][bot]) continue;
-			
-			M[next][bot] = false;
-			
-			bool tryResult = tryT(next);
-
-			if (tryResult) return true;
-			else M[next][bot] = true;
+			else  M[top][next] = false;
 		}
 
 		return false;

@@ -38,16 +38,16 @@ public:
 	// been searched to be without augemnt path.
 	bool visT[55]; 
 	bool visB[55];
-	bool usedT[55];
-	bool usedB[55];
+	int matchT[55];
+	int matchB[55];
 	int T, B;
 
 	bool isFreeT(int index) {
-		return !usedT[index];
+		return matchT[index] < 0;
 	}
 	
 	bool isFreeB(int index) {
-		return !usedB[index];
+		return matchB[index] < 0;
 	}
 	
 	bool tryAdd(int top) {
@@ -55,35 +55,31 @@ public:
 		memset(visB, false, sizeof(visB));
 		return tryT(top);
 	}
-
-	//from top to bottom, choose free edge
+	
 	bool tryT(int top) {
 		if (visT[top]) return false;
-		visT[top] = true;
+		else visT[top] = true;
 
 		for (int next = 0; next < B; next++) {
-			if (!G[top][next]) continue;
-			if (M[top][next]) continue;
+			if (!G[top][next] || M[top][next]) continue;
 			
 			M[top][next] = true;			
-			bool tryResult = false;
 			if (isFreeB(next)) {
-				usedB[next] = true;
+				matchT[top] = next; matchB[next] = top;
 				return true;
-			} else {
-				int nextTop = -1;
-				for (int i = 0; i < T; i++) {
-					if (i == top) continue;
-					if (M[i][next]) {
-						nextTop = i; break;
-					}
-				}
-				M[nextTop][next] = false;
-				tryResult = tryT(nextTop);
-				if (!tryResult) M[nextTop][next] = true;
 			}
-			if (tryResult) return true;
-			else  M[top][next] = false;
+			
+			int nextTop = matchB[next];
+			matchT[nextTop] = -1; matchB[next] = top; matchT[top] = next;
+			M[nextTop][next] = false;
+			bool tryResult = tryT(nextTop);
+			if (!tryResult) { 
+				M[nextTop][next] = true;
+				matchT[nextTop] = next; matchB[next] = nextTop; matchT[top] = -1;
+				M[top][next] = false;
+			} else {
+				return true;
+			}
 		}
 
 		return false;
@@ -92,10 +88,7 @@ public:
 	bool tryAugmentPath() {
 		for (int i = 0; i < T; i++) {
 			if (!isFreeT(i)) continue;
-			if (tryAdd(i)) {
-				usedT[i] = true;
-				return true;
-			}
+			if (tryAdd(i)) return true;
 		}
 		return false;    
 	}
@@ -113,8 +106,8 @@ botR) {
 	for (int j = 0; j < B; j++)
 		if (top[i].canBeWizard(bot[j])) G[i][j] = true;
 		
-	memset(usedT, false, sizeof(usedT));
-	memset(usedB, false, sizeof(usedB));
+	for (int i = 0; i < T; i++) matchT[i] = -1;
+	for (int i = 0; i < B; i++) matchB[i] = -1;
 		
 	memset(M, false, sizeof(M));
 
@@ -124,6 +117,9 @@ botR) {
 	for (int i = 0; i < T; i++)
 	for (int j = 0; j < B; j++)
 		result += M[i][j];
+		
+	for (int i = 0; i < T; i++) cout << "T: " << matchT[i]  << endl;
+	for (int i = 0; i < B; i++) cout << "B: " <<  matchB[i] << endl;	
 
 	return result;
 }

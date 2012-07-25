@@ -34,7 +34,9 @@ public:
 	int getNumHats(vector <int>, vector <int>, vector <int>, vector <int>);
 	bool G[55][55];
 	bool M[55][55];
-	bool visT[55];
+	// visT , visB in each augment searching, should not be reset, because it has been proved that the vertex has
+	// been searched to be without augemnt path.
+	bool visT[55]; 
 	bool visB[55];
 	bool usedT[55];
 	bool usedB[55];
@@ -49,40 +51,34 @@ public:
 	}
 	
 	bool tryAdd(int top) {
-		//cout << top << " --> " << bot << endl;
 		memset(visT, false, sizeof(visT));
 		memset(visB, false, sizeof(visB));
-		return tryTB(top);
+		return tryT(top);
 	}
 
-	bool tryTB(int top) {
+	//from top to bottom, choose free edge
+	bool tryT(int top) {
 		if (visT[top]) return false;
 		visT[top] = true;
-		//cout << "top: " << top << endl;		
 
 		for (int next = 0; next < B; next++) {
 			if (!G[top][next]) continue;
 			if (M[top][next]) continue;
 			
-			M[top][next] = true;
-			
-			bool tryResult = tryBB(next);
-			
-			if (!tryResult) {
-				M[top][next] = false;
-			} else {
-				return true;
-			}
+			M[top][next] = true;			
+			bool tryResult = tryB(next);
+			if (tryResult) return true;
+			else M[top][next] = false;
 		}
 
-		//visT[top] = false;
 		return false;
 	}
 	
-	bool tryBB(int bot) {
+	//from bottom to top, choose matched edge
+	bool tryB(int bot) {
 		if (visB[bot]) return false;
 		visB[bot] = true;
-		//cout << "bottom: " << bot << endl;
+
 		if (isFreeB(bot)) {
 			usedB[bot] = true;
 			return true;
@@ -94,28 +90,24 @@ public:
 			
 			M[next][bot] = false;
 			
-			bool tryResult = tryTB(next);
+			bool tryResult = tryT(next);
 
-			if (!tryResult) {
-				M[next][bot] = true;
-			} else {
-				return true;
-			}
+			if (tryResult) return true;
+			else M[next][bot] = true;
 		}
-		//visB[bot] = false;
+
 		return false;
 	}
 	 
-	bool existAugment() {
-		bool flag = false;
+	bool tryAugmentPath() {
 		for (int i = 0; i < T; i++) {
 			if (!isFreeT(i)) continue;
 			if (tryAdd(i)) {
 				usedT[i] = true;
-				flag = true;
+				return true;
 			}
 		}
-		return flag;    
+		return false;    
 	}
 };
 
@@ -127,8 +119,8 @@ botR) {
 	T =  top.size(); B = bot.size();
 	
 	memset(G, false, sizeof(G));
-	for (int i = 0; i < top.size(); i++)
-	for (int j = 0; j < bot.size(); j++)
+	for (int i = 0; i < T; i++)
+	for (int j = 0; j < B; j++)
 		if (top[i].canBeWizard(bot[j])) G[i][j] = true;
 		
 	memset(usedT, false, sizeof(usedT));
@@ -136,22 +128,13 @@ botR) {
 		
 	memset(M, false, sizeof(M));
 
-	for (int i = 0; i < top.size(); i++) {
-	for (int j = 0; j < bot.size(); j++)
-		cout << G[i][j]<< " "; 
-		cout << endl;	
-	}
-
-	while(existAugment()) {
-		//addAugment();
-	}
+	while(tryAugmentPath());
 	
 	int result = 0;
-	for (int i = 0; i < top.size(); i++)
-	for (int j = 0; j < bot.size(); j++)
-		if (M[i][j]) result++;
+	for (int i = 0; i < T; i++)
+	for (int j = 0; j < B; j++)
+		result += M[i][j];
 
-	
 	return result;
 }
 

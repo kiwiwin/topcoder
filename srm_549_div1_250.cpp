@@ -33,27 +33,12 @@ class PointyWizardHats {
 public:
 	int getNumHats(vector <int>, vector <int>, vector <int>, vector <int>);
 	bool G[55][55];
-	bool M[55][55];
-	// visT , visB in each augment searching, should not be reset, because it has been proved that the vertex has
-	// been searched to be without augemnt path.
-	bool visT[55]; 
-	bool visB[55];
-	int matchT[55];
+	bool visT[55];
 	int matchB[55];
 	int T, B;
-
-	bool isFreeT(int index) {
-		return matchT[index] < 0;
-	}
 	
 	bool isFreeB(int index) {
 		return matchB[index] < 0;
-	}
-	
-	bool tryAdd(int top) {
-		memset(visT, false, sizeof(visT));
-		memset(visB, false, sizeof(visB));
-		return tryT(top);
 	}
 	
 	bool tryT(int top) {
@@ -61,68 +46,45 @@ public:
 		else visT[top] = true;
 
 		for (int next = 0; next < B; next++) {
-			if (!G[top][next] || M[top][next]) continue;
-			
-			M[top][next] = true;			
-			if (isFreeB(next)) {
-				matchT[top] = next; matchB[next] = top;
-				return true;
-			}
-			
-			int nextTop = matchB[next];
-			matchT[nextTop] = -1; matchB[next] = top; matchT[top] = next;
-			M[nextTop][next] = false;
-			bool tryResult = tryT(nextTop);
-			if (!tryResult) { 
-				M[nextTop][next] = true;
-				matchT[nextTop] = next; matchB[next] = nextTop; matchT[top] = -1;
-				M[top][next] = false;
-			} else {
+			if (!G[top][next]) continue;						
+			if (isFreeB(next) || tryT(matchB[next])) {
+				matchB[next] = top;
 				return true;
 			}
 		}
 
 		return false;
 	}
-	 
-	bool tryAugmentPath() {
+	
+	int maximumMatch() {
+		int result = 0 ;
 		for (int i = 0; i < T; i++) {
-			if (!isFreeT(i)) continue;
-			if (tryAdd(i)) return true;
+			memset(visT, false, sizeof(visT));
+			if (tryT(i)) result++;
 		}
-		return false;    
+		return result;
+	}
+	
+	void makeGraph(const vector<int> &topH, const vector<int> &topR, const vector<int> &botH, const vector<int> &botR) {
+		vector<Hat> top, bot;
+		for (int i = 0; i < topH.size(); i++) top.push_back(Hat(topH[i], topR[i]));
+		for (int i = 0; i < botH.size(); i++) bot.push_back(Hat(botH[i], botR[i]));
+		T =  top.size(); B = bot.size();
+		
+		memset(G, false, sizeof(G));
+		for (int i = 0; i < T; i++)
+		for (int j = 0; j < B; j++)
+			if (top[i].canBeWizard(bot[j])) G[i][j] = true;	
 	}
 };
 
 int PointyWizardHats::getNumHats(vector <int> topH, vector <int> topR, vector <int> botH, vector <int> 
 botR) {
-	vector<Hat> top, bot;
-	for (int i = 0; i < topH.size(); i++) top.push_back(Hat(topH[i], topR[i]));
-	for (int i = 0; i < botH.size(); i++) bot.push_back(Hat(botH[i], botR[i]));
-	T =  top.size(); B = bot.size();
-	
-	memset(G, false, sizeof(G));
-	for (int i = 0; i < T; i++)
-	for (int j = 0; j < B; j++)
-		if (top[i].canBeWizard(bot[j])) G[i][j] = true;
+	makeGraph(topH, topR, botH, botR);
 		
-	for (int i = 0; i < T; i++) matchT[i] = -1;
 	for (int i = 0; i < B; i++) matchB[i] = -1;
-		
-	memset(M, false, sizeof(M));
 
-	while(tryAugmentPath());
-	
-	int result = 0;
-	for (int i = 0; i < T; i++)
-	for (int j = 0; j < B; j++)
-		result += M[i][j];
-		
-	for (int i = 0; i < T; i++) cout << "T: " << matchT[i]  << endl;
-	for (int i = 0; i < B; i++) cout << "B: " <<  matchB[i] << endl;	
-
-	return result;
+	return maximumMatch();
 }
-
 
 //Powered by [KawigiEdit] 2.0!

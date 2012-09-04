@@ -29,4 +29,4 @@ sort() reverse()
 
 srm_159_div2_250
 
-int/int 型的相除会得到整数，不能再被ceil
+*** int/int 型的相除会得到去掉小数部分的整数，不会再被ceil
